@@ -1,18 +1,19 @@
 from datetime import datetime
-
 from pydantic import BaseModel, ConfigDict
+import uuid
 
+from src.files.model import ProcessingStatus, ScanStatus
 
 class FileItem(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    id: str
+    id: uuid.UUID
     title: str
     original_name: str
     mime_type: str
     size: int
-    processing_status: str
-    scan_status: str | None
+    processing_status: ProcessingStatus
+    scan_status: ScanStatus | None
     scan_details: str | None
     metadata_json: dict | None
     requires_attention: bool
@@ -22,13 +23,3 @@ class FileItem(BaseModel):
 
 class FileUpdate(BaseModel):
     title: str
-
-
-class AlertItem(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int
-    file_id: str
-    level: str
-    message: str
-    created_at: datetime

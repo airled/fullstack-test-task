@@ -101,7 +101,10 @@ export default function Page() {
     setErrorMessage(null);
 
     try {
-      const [filesResponse, alertsResponse] = await Promise.all([
+      const [
+        filesResponse,
+        alertsResponse,
+      ] = await Promise.all([
         fetch(`http://localhost:8000/files`, { cache: "no-store" }),
         fetch(`http://localhost:8000/alerts`, { cache: "no-store" }),
       ]);

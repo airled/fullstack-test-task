@@ -1,4 +1,23 @@
 services:
+  backend-db:
+    image: postgres:latest
+    container_name: backend-db
+    ports:
+      - "5433:5432"
+    env_file: ".env.dev"
+    volumes:
+      - backend-db-volume:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD", "pg_isready", "-d", "test", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  backend-redis:
+    image: redis:latest
+    container_name: backend-redis
+
   backend:
     build: ./backend
     command: uvicorn src.app:app --host 0.0.0.0 --reload --port 8000
@@ -9,7 +28,8 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - backend-db
+      backend-db:
+        condition: service_healthy
 
   backend-worker:
     build: ./backend
@@ -19,28 +39,16 @@ services:
     volumes:
       - ./backend:/backend
     depends_on:
-      - backend-db
+      backend-db:
+        condition: service_healthy
 
-  backend-db:
-    image: postgres:latest
-    container_name: backend-db
-    ports:
-      - "5433:5433"
-    env_file: ".env.dev"
-    volumes:
-      - backend-db-volume:/var/lib/postgresql
-
-  backend-redis:
-    image: redis:latest
-    container_name: backend-redis
-
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: frontend
-    ports:
-      - "3000:3000"
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   container_name: frontend
+  #   ports:
+  #     - "3000:3000"
 
 volumes:
   backend-db-volume:
